@@ -1,31 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { Copy, Shuffle } from "lucide-react";
 
-//simple local UI replacements
-function Button({ children, onClick, className }) {
+// --- simple local UI components (no Tailwind needed) ---
+function Button({ children, onClick, variant = "solid", style = {}, ...props }) {
+  const base = {
+    cursor: "pointer",
+    borderRadius: 9999,
+    padding: "12px 20px",
+    fontSize: 20,
+    fontWeight: 700,
+    lineHeight: 1,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    border: "2px solid transparent",
+  };
+  const variants = {
+    solid: { background: "#FFF8F0", color: "#D6453D" },
+    outline: { background: "transparent", color: "#FFF8F0", borderColor: "#FFF8F0" },
+  };
   return (
-    <button
-      onClick={onClick}
-      className={`cursor-pointer ${className}`}
-    >
+    <button onClick={onClick} style={{ ...base, ...variants[variant], ...style }} {...props}>
       {children}
     </button>
   );
 }
 
-function Card({ children, className }) {
+function Card({ children, style = {} }) {
   return (
-    <div className={`rounded-2xl shadow-lg ${className}`}>
+    <div
+      style={{
+        background: "#FFF8F0",
+        color: "#D6453D",
+        borderRadius: 32,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+        width: "100%",
+        ...style,
+      }}
+    >
       {children}
     </div>
   );
 }
 
-function CardContent({ children, className }) {
-  return <div className={className}>{children}</div>;
+function CardContent({ children, style = {} }) {
+  return <div style={{ padding: 40, ...style }}>{children}</div>;
 }
 
-
+// --- data ---
 const BASE_ADJECTIVES = ["brothy", "stewy", "soupy", "lush", "cozy", "zippy", "lemony", "peppery", "smoky", "gingery", "garlicky"];
 const FOOD_ADJECTIVES = ["silky", "jammy", "buttery", "herby", "bright", "toasty", "tangy", "umami-rich", "velvety", "pillowy"];
 const LEGUMES = ["chickpeas", "white beans", "cannellini beans", "butter beans", "borlotti beans", "navy beans", "gigantes", "brown lentils", "green lentils", "red lentils", "urad dal", "pigeon peas (toor dal)", "mung beans", "adzuki beans", "black chickpeas (kala chana)", "soybeans"];
@@ -54,51 +76,55 @@ export default function BrothyBeanyGenerator() {
   const shuffle = () => setLine(makeLine());
   const copyLine = async () => await navigator.clipboard.writeText(line);
 
+  // --- layout styles (no Tailwind required) ---
+  const pageStyle = {
+    minHeight: "100vh",
+    backgroundColor: "#D6453D",
+    color: "#FFF8F0",
+    padding: "40px 24px",
+    fontFamily: "'Fredoka One', sans-serif",
+    display: "flex",
+    justifyContent: "center",
+  };
+  const wrapperStyle = { maxWidth: 880, width: "100%" };
+  const headerStyle = { marginBottom: 24 };
+  const h1Style = {
+    fontSize: 64,
+    fontWeight: 800,
+    margin: 0,
+    textTransform: "lowercase",
+  };
+  const subStyle = { fontSize: 20, margin: "8px 0 16px" };
+  const switcherStyle = { display: "flex", gap: 16, marginBottom: 24 };
+  const bottomBarStyle = { display: "flex", gap: 12, marginTop: 24 };
+
   return (
-    <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap'); body { font-family: 'Fredoka One', sans-serif; }`}</style>
-      <div className="min-h-screen w-full bg-[#D6453D] text-[#FFF8F0] p-6 md:p-10 font-[Fredoka_One,sans-serif]">
-        <div className="mx-auto max-w-3xl flex flex-col items-center text-center">
-          <header className="mb-8">
-            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight text-[#FFF8F0] drop-shadow-lg lowercase">
-              brothy beany generator
-            </h1>
-          </header>
-
-          {/* Mode Switcher */}
-          <p className="text-xl mb-3 lowercase">are you feeling soupy or swooshy?</p>
-          <div className="flex justify-center gap-6 mb-8">
-            <Button
-              onClick={() => setMode("soupy")}
-              className={`rounded-full px-6 py-3 text-2xl font-bold shadow ${mode === "soupy" ? "bg-[#FFF8F0] text-[#D6453D]" : "bg-transparent border-2 border-[#FFF8F0] text-[#FFF8F0] hover:bg-[#FFF8F0]/10"}`}
-            >
-              soupy
-            </Button>
-            <Button
-              onClick={() => setMode("swooshy")}
-              className={`rounded-full px-6 py-3 text-2xl font-bold shadow ${mode === "swooshy" ? "bg-[#FFF8F0] text-[#D6453D]" : "bg-transparent border-2 border-[#FFF8F0] text-[#FFF8F0] hover:bg-[#FFF8F0]/10"}`}
-            >
-              swooshy
-            </Button>
+    <div style={pageStyle}>
+      <div style={wrapperStyle}>
+        <header style={headerStyle}>
+          <h1 style={h1Style}>brothy beany generator</h1>
+          <p style={subStyle}>are you feeling soupy or swooshy?</p>
+          <div style={switcherStyle}>
+            <Button onClick={() => setMode("soupy")} variant={mode === "soupy" ? "solid" : "outline"}>soupy</Button>
+            <Button onClick={() => setMode("swooshy")} variant={mode === "swooshy" ? "solid" : "outline"}>swooshy</Button>
           </div>
+        </header>
 
-          <Card className="border-none bg-[#FFF8F0] text-[#D6453D] shadow-xl rounded-[2rem] w-full">
-            <CardContent className="p-10">
-              <p className="text-2xl md:text-3xl leading-snug text-center font-semibold lowercase">{line}</p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardContent>
+            <p style={{ fontSize: 28, fontWeight: 700, textAlign: "center", textTransform: "lowercase", margin: 0 }}>{line}</p>
+          </CardContent>
+        </Card>
 
-          {/* Shuffle and Copy Buttons */}
-          <div className="flex justify-center gap-4 mt-8">
-            <Button onClick={shuffle} className="rounded-full bg-[#FFF8F0] text-[#D6453D] text-lg px-6 py-3 shadow hover:bg-white transition flex items-center lowercase">
-              <Shuffle className="mr-2 h-5 w-5"/> shuffle
-            </Button>
-            <Button onClick={copyLine} className="rounded-full bg-transparent border-2 border-[#FFF8F0] text-[#FFF8F0] text-lg px-6 py-3 shadow hover:bg-[#FFF8F0]/10 transition flex items-center lowercase">
-              <Copy className="mr-2 h-5 w-5"/> copy
-            </Button>
-          </div>
+        <div style={bottomBarStyle}>
+          <Button onClick={shuffle}>
+            <Shuffle size={20} /> shuffle
+          </Button>
+          <Button onClick={copyLine} variant="outline">
+            <Copy size={20} /> copy
+          </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
